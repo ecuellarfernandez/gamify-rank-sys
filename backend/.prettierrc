@@ -4,6 +4,9 @@
     "singleQuote": false,
     "printWidth": 180,
     "tabWidth": 4,
-    "arrowParens": "avoid",
-    "endOfLine": "auto"
+    "arrowParens": "always",
+    "endOfLine": "auto",
+    "importOrder": ["^@nestjs/(.*)$", "^typeorm$", "^src/(.*)$", "^[./]"],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true
 }
