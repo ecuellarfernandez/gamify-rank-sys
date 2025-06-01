@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { IsEmail, IsOptional, IsString, MinLength, IsInt } from "class-validator";
+import { IsEmail, IsOptional, IsString, MinLength } from "class-validator";
 
 export class UpdateUserDto {
     @IsOptional()
@@ -16,6 +16,6 @@ export class UpdateUserDto {
     password?: string;
 
     @IsOptional()
-    @IsInt()
+    @IsString()
     roleId?: number;
 }

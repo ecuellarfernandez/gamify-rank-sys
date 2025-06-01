@@ -1,3 +1,3 @@
 export interface AuthenticatedRequest extends Request {
-    user: { id: number };
+    user: { id: string };
 }

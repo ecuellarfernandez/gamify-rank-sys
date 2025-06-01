@@ -14,7 +14,8 @@ export class UserController {
     @UseGuards(AuthGuard("jwt"))
     @Get("me")
     me(@Req() req: AuthenticatedRequest) {
-        return this.UserService.findOne(Number(req.user.id));
+        console.log("User ID from request:", req.user);
+        return this.UserService.findOne(String(req.user.id));
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
@@ -28,7 +29,7 @@ export class UserController {
     @Roles("admin")
     @Get(":id")
     findOne(@Param("id") id: string) {
-        return this.UserService.findOne(Number(id));
+        return this.UserService.findOne(id);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
@@ -42,13 +43,13 @@ export class UserController {
     @Roles("admin")
     @Put(":id")
     update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-        return this.UserService.update(Number(id), updateUserDto);
+        return this.UserService.update(id, updateUserDto);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
     @Roles("admin")
     @Delete(":id")
     remove(@Param("id") id: string) {
-        return this.UserService.remove(Number(id));
+        return this.UserService.remove(id);
     }
 }
