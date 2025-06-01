@@ -32,6 +32,7 @@ export class AuthService {
         if (user && (await bcrypt.compare(pass, user.password))) {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { password, ...result } = user;
+            console.log("User validated with role:", result.role.name);
             return result;
         }
         throw new UnauthorizedException("Invalid credentials");

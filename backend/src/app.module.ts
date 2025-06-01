@@ -5,8 +5,6 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserModule } from "./user/user.module";
 import { RoleModule } from "./role/role.module";
 import { AuthModule } from "./auth/auth.module";
-import * as dotenv from "dotenv";
-dotenv.config();
 
 @Module({
     imports: [
