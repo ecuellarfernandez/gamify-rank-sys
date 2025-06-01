@@ -19,7 +19,7 @@ export class RoleController {
     @UseGuards(AuthGuard("jwt"))
     @Get(":id")
     findOne(@Param("id") id: string) {
-        return this.roleService.findOne(Number(id));
+        return this.roleService.findOne(id);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
@@ -33,7 +33,7 @@ export class RoleController {
     @Roles("admin")
     @Put(":id")
     update(@Param("id") id: string, @Body() updateRoleDto: UpdateRoleDto) {
-        return this.roleService.update(Number(id), updateRoleDto);
+        return this.roleService.update(id, updateRoleDto);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
