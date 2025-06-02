@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { ActivityService } from "./activity.service";
 import { CreateActivityDto } from "./dto/create-activity.dto";
 import { AuthGuard } from "@nestjs/passport";
@@ -14,5 +14,11 @@ export class ActivityController {
     @Post()
     async create(@Body() dto: CreateActivityDto) {
         return this.activityService.createActivity(dto);
+    }
+
+    @UseGuards(AuthGuard("jwt"))
+    @Get()
+    async findAll() {
+        return this.activityService.findAll();
     }
 }

@@ -15,4 +15,8 @@ export class ActivityService {
         const activity = this.activityRepo.create(dto);
         return this.activityRepo.save(activity);
     }
+
+    async findAll() {
+        return this.activityRepo.find();
+    }
 }
