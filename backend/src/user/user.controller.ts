@@ -9,47 +9,44 @@ import { AuthenticatedRequest } from "./type/authenticated-request.type";
 
 @Controller("user")
 export class UserController {
-    constructor(private readonly UserService: UserService) {}
+    constructor(private readonly userService: UserService) {}
 
     @UseGuards(AuthGuard("jwt"))
     @Get("me")
-    me(@Req() req: AuthenticatedRequest) {
-        console.log("User ID from request:", req.user);
-        return this.UserService.findOne(String(req.user.id));
+    async me(@Req() req: AuthenticatedRequest) {
+        return await this.userService.findOne(String(req.user.id));
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
     @Roles("admin")
     @Get()
-    findAll() {
-        return this.UserService.findAll();
+    async findAll() {
+        return await this.userService.findAll();
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
     @Roles("admin")
     @Get(":id")
-    findOne(@Param("id") id: string) {
-        return this.UserService.findOne(id);
+    async findOne(@Param("id") id: string) {
+        return await this.userService.findOne(id);
     }
 
-    @UseGuards(AuthGuard("jwt"), RolesGuard)
-    @Roles("admin")
-    @Post()
-    create(@Body() createUserDto: CreateUserDto) {
-        return this.UserService.create(createUserDto);
+    @Post("register")
+    async register(@Body() createUserDto: CreateUserDto) {
+        return await this.userService.create(createUserDto);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
     @Roles("admin")
     @Put(":id")
-    update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-        return this.UserService.update(id, updateUserDto);
+    async update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
+        return await this.userService.update(id, updateUserDto);
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)
     @Roles("admin")
     @Delete(":id")
-    remove(@Param("id") id: string) {
-        return this.UserService.remove(id);
+    async remove(@Param("id") id: string) {
+        return await this.userService.remove(id);
     }
 }

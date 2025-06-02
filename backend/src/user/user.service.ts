@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entity/user.entity";
 import { Role } from "src/role/entity/role.entity";
@@ -14,20 +14,31 @@ export class UserService {
         @InjectRepository(Role)
         private roleRepository: Repository<Role>,
     ) {}
-    async create(userData: CreateUserDto): Promise<User> {
+
+    async create(createUserDto: CreateUserDto): Promise<User> {
         try {
             const salt = await bcrypt.genSalt();
-            userData.password = await bcrypt.hash(userData.password, salt);
-            const user = this.userRepository.create(userData);
+            const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+
+            // Busca el rol "user"
+            const role = await this.roleRepository.findOne({ where: { name: "user" } });
+            if (!role) throw new NotFoundException('Default role "user" not found');
+
+            const user = this.userRepository.create({
+                ...createUserDto,
+                password: hashedPassword,
+                role,
+            });
             return await this.userRepository.save(user);
         } catch (error) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (error.code === "23505") {
-                throw new ConflictException("El email ya está registrado.");
+                throw new ConflictException("Email already registered.");
             }
-            throw new InternalServerErrorException("Error al crear el usuario.");
+            throw new InternalServerErrorException("Error creating user.");
         }
     }
+
     async findAll(): Promise<User[]> {
         return this.userRepository.find({ relations: ["role"] });
     }
