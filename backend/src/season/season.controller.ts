@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { SeasonService } from "./season.service";
 import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../auth/guard/roles.guard";
@@ -13,5 +13,11 @@ export class SeasonController {
     @Post()
     async create(@Body() dto: { name: string; start_date: string; end_date: string }) {
         return this.seasonService.create(dto);
+    }
+
+    @UseGuards(AuthGuard("jwt"))
+    @Get()
+    async findAll() {
+        return this.seasonService.findAll();
     }
 }

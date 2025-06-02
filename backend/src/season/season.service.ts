@@ -14,4 +14,8 @@ export class SeasonService {
         const season = this.seasonRepo.create(dto);
         return this.seasonRepo.save(season);
     }
+
+    async findAll() {
+        return this.seasonRepo.find({ order: { start_date: "DESC" } });
+    }
 }
