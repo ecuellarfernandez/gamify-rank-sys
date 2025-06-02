@@ -10,6 +10,9 @@ import { AchievementModule } from './achievement/achievement.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { SeasonModule } from './season/season.module';
 import { RankingModule } from './ranking/ranking.module';
+import { UserActivityService } from './user-activity/user-activity.service';
+import { UserActivityController } from './user-activity/user-activity.controller';
+import { UserActivityModule } from './user-activity/user-activity.module';
 
 @Module({
     imports: [
@@ -32,8 +35,9 @@ import { RankingModule } from './ranking/ranking.module';
         FeedbackModule,
         SeasonModule,
         RankingModule,
+        UserActivityModule,
     ],
-    controllers: [AppController],
-    providers: [AppService],
+    controllers: [AppController, UserActivityController],
+    providers: [AppService, UserActivityService],
 })
 export class AppModule {}
