@@ -40,6 +40,8 @@ async function bootstrap() {
         { name: "Alice", email: "alice@email.com", password: "password123", role: userRole },
         { name: "Bob", email: "bob@email.com", password: "password123", role: userRole },
         { name: "Charlie", email: "charlie@email.com", password: "password123", role: userRole },
+        { name: "Diana", email: "diana@email.com", password: "password123", role: userRole },
+        { name: "Eve", email: "eve@email.com", password: "password123", role: userRole },
     ];
 
     const users: User[] = [];
@@ -58,6 +60,7 @@ async function bootstrap() {
         { type: "Quiz", description: "Complete the weekly quiz", points: 50 },
         { type: "Project", description: "Submit a project", points: 100 },
         { type: "Attendance", description: "Attend all sessions this week", points: 30 },
+        { type: "Bonus", description: "Extra challenge", points: 70 },
     ];
     const activities: Activity[] = [];
     for (const data of activitiesData) {
@@ -69,18 +72,38 @@ async function bootstrap() {
         activities.push(activity);
     }
 
-    // 4. Temporadas
+    // 4. Más temporadas
     const now = new Date();
     const seasonsData = [
         {
+            name: "Spring 2024",
+            start_date: new Date(now.getFullYear() - 1, 2, 1), // Mar 1, 2024
+            end_date: new Date(now.getFullYear() - 1, 4, 31), // May 31, 2024
+        },
+        {
+            name: "Summer 2024",
+            start_date: new Date(now.getFullYear() - 1, 5, 1), // Jun 1, 2024
+            end_date: new Date(now.getFullYear() - 1, 7, 31), // Aug 31, 2024
+        },
+        {
+            name: "Autumn 2024",
+            start_date: new Date(now.getFullYear() - 1, 8, 1), // Sep 1, 2024
+            end_date: new Date(now.getFullYear() - 1, 10, 30), // Nov 30, 2024
+        },
+        {
+            name: "Winter 2024",
+            start_date: new Date(now.getFullYear() - 1, 11, 1), // Dec 1, 2024
+            end_date: new Date(now.getFullYear(), 1, 28), // Feb 28, 2025
+        },
+        {
             name: "Spring 2025",
-            start_date: new Date(now.getFullYear(), 2, 1), // March 1
-            end_date: new Date(now.getFullYear(), 4, 31), // May 31
+            start_date: new Date(now.getFullYear(), 2, 1), // Mar 1, 2025
+            end_date: new Date(now.getFullYear(), 4, 31), // May 31, 2025
         },
         {
             name: "Summer 2025",
-            start_date: new Date(now.getFullYear(), 5, 1), // June 1
-            end_date: new Date(now.getFullYear(), 7, 31), // August 31
+            start_date: new Date(now.getFullYear(), 5, 1), // Jun 1, 2025
+            end_date: new Date(now.getFullYear(), 7, 31), // Aug 31, 2025
         },
     ];
     const seasons: Season[] = [];
@@ -93,17 +116,20 @@ async function bootstrap() {
         seasons.push(season);
     }
 
-    // 5. Rankings (para la primera temporada)
-    for (const [i, user] of users.entries()) {
-        const total_points = 100 + i * 50;
-        let ranking = await rankingRepo.findOne({ where: { user: { id: user.id }, season: { id: seasons[0].id } } });
-        if (!ranking) {
-            ranking = rankingRepo.create({
-                user,
-                season: seasons[0],
-                total_points,
-            });
-            await rankingRepo.save(ranking);
+    // 5. Rankings para todas las temporadas
+    for (const [seasonIdx, season] of seasons.entries()) {
+        for (const [userIdx, user] of users.entries()) {
+            // Genera puntos distintos para cada usuario y temporada
+            const total_points = 100 + seasonIdx * 30 + userIdx * 40 + Math.floor(Math.random() * 30);
+            let ranking = await rankingRepo.findOne({ where: { user: { id: user.id }, season: { id: season.id } } });
+            if (!ranking) {
+                ranking = rankingRepo.create({
+                    user,
+                    season,
+                    total_points,
+                });
+                await rankingRepo.save(ranking);
+            }
         }
     }
 
