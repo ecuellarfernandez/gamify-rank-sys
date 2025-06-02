@@ -5,14 +5,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserModule } from "./user/user.module";
 import { RoleModule } from "./role/role.module";
 import { AuthModule } from "./auth/auth.module";
-import { ActivityModule } from './activity/activity.module';
-import { AchievementModule } from './achievement/achievement.module';
-import { FeedbackModule } from './feedback/feedback.module';
-import { SeasonModule } from './season/season.module';
-import { RankingModule } from './ranking/ranking.module';
-import { UserActivityService } from './user-activity/user-activity.service';
-import { UserActivityController } from './user-activity/user-activity.controller';
-import { UserActivityModule } from './user-activity/user-activity.module';
+import { ActivityModule } from "./activity/activity.module";
+import { AchievementModule } from "./achievement/achievement.module";
+import { FeedbackModule } from "./feedback/feedback.module";
+import { SeasonModule } from "./season/season.module";
+import { RankingModule } from "./ranking/ranking.module";
+import { UserActivityModule } from "./user-activity/user-activity.module";
 
 @Module({
     imports: [
@@ -37,7 +35,7 @@ import { UserActivityModule } from './user-activity/user-activity.module';
         RankingModule,
         UserActivityModule,
     ],
-    controllers: [AppController, UserActivityController],
-    providers: [AppService, UserActivityService],
+    controllers: [AppController],
+    providers: [AppService],
 })
 export class AppModule {}
