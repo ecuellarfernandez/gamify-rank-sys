@@ -1,32 +1,49 @@
 import type { RankingEntry } from "../hooks/useRanking";
-import { FaMedal } from "react-icons/fa";
+import { FaTrophy } from "react-icons/fa";
 
-const getMedal = (position: number) => {
-    if (position === 1) return <FaMedal style={{ color: "#FFD700", fontSize: 28 }} title="Oro" />;
-    if (position === 2) return <FaMedal style={{ color: "#C0C0C0", fontSize: 28 }} title="Plata" />;
-    if (position === 3) return <FaMedal style={{ color: "#CD7F32", fontSize: 28 }} title="Bronce" />;
-    return position;
-};
+const podium = [
+    { position: 2, height: 32, color: "#C0C0C0" }, // Plata (izquierda)
+    { position: 1, height: 48, color: "#FFD700" }, // Oro (centro)
+    { position: 3, height: 24, color: "#CD7F32" }, // Bronce (derecha)
+];
 
 export function RankingTable({ ranking }: { ranking: RankingEntry[] }) {
+    // Ordena para que el podio sea [2,1,3]
+    const podiumRanking = [ranking[1], ranking[0], ranking[2]];
+
     return (
-        <table>
-            <thead>
-                <tr>
-                    <th>Posición</th>
-                    <th>Nombre</th>
-                    <th>Puntos</th>
-                </tr>
-            </thead>
-            <tbody>
-                {ranking.map((entry) => (
-                    <tr key={entry.user.id}>
-                        <td>{getMedal(entry.position)}</td>
-                        <td>{entry.user.name}</td>
-                        <td>{entry.total_points}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
+        <div className="flex justify-center items-end h-96 gap-6">
+            {podium.map((p, idx) => {
+                const entry = podiumRanking[idx];
+                if (!entry) return (
+                    <div key={p.position} className="flex flex-col items-center w-32 mx-2" />
+                );
+                return (
+                    <div
+                        key={entry.user.id}
+                        className="flex flex-col items-center w-32"
+                    >
+                        <div className="mb-2">
+                            <FaTrophy style={{ color: p.color, fontSize: p.height }} />
+                        </div>
+                        <div
+                            className="flex flex-col items-center justify-end w-full"
+                            style={{
+                                height: `${100 + p.height}px`,
+                                background: "#f3f4f6",
+                            }}
+                        >
+                            <div className="text-5xl font-bold">
+                                {p.position}
+                            </div>
+                            <div className="text-center px-2 py-1">
+                                <div className="font-semibold">{entry.user.name}</div>
+                                <div className="text-sm">{entry.total_points} puntos</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     );
 }
