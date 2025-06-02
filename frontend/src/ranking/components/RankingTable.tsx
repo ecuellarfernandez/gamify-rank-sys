@@ -27,16 +27,16 @@ export function RankingTable({ ranking }: { ranking: RankingEntry[] }) {
                             <FaTrophy style={{ color: p.color, fontSize: p.height }} />
                         </div>
                         <div
-                            className="flex flex-col items-center justify-end w-full"
+                            className="flex flex-col items-center justify-end w-full text-white"
                             style={{
                                 height: `${100 + p.height}px`,
-                                background: "#f3f4f6",
+                                background: "rgb(44 44 44)",
                             }}
                         >
                             <div className="text-5xl font-bold">
                                 {p.position}
                             </div>
-                            <div className="text-center px-2 py-1">
+                            <div className="text-center px-2 py-2">
                                 <div className="font-semibold">{entry.user.name}</div>
                                 <div className="text-sm">{entry.total_points} puntos</div>
                             </div>
