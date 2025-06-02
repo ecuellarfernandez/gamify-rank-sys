@@ -17,11 +17,26 @@ export class RankingService {
         const season = await this.seasonRepo.findOne({ where: { id: seasonId } });
         if (!season) throw new NotFoundException("Season not found");
 
-        return this.rankingRepo.find({
+        const rankings = await this.rankingRepo.find({
             where: { season: { id: seasonId } },
             relations: ["user", "season"],
             order: { total_points: "DESC" },
         });
+
+        // Estructura para frontend: agrega posición y solo los datos necesarios
+        return rankings.map((ranking, index) => ({
+            position: index + 1,
+            user: {
+                id: ranking.user.id,
+                name: ranking.user.name,
+                email: ranking.user.email,
+            },
+            total_points: ranking.total_points,
+            season: {
+                id: season.id,
+                name: season.name,
+            },
+        }));
     }
 
     async getCurrentSeasonRanking() {
@@ -30,6 +45,24 @@ export class RankingService {
 
         if (!season) throw new NotFoundException("No active season");
 
-        return this.getRankingBySeason(season.id);
+        const rankings = await this.rankingRepo.find({
+            where: { season: { id: season.id } },
+            relations: ["user", "season"],
+            order: { total_points: "DESC" },
+        });
+
+        return rankings.map((ranking, index) => ({
+            position: index + 1,
+            user: {
+                id: ranking.user.id,
+                name: ranking.user.name,
+                email: ranking.user.email,
+            },
+            total_points: ranking.total_points,
+            season: {
+                id: season.id,
+                name: season.name,
+            },
+        }));
     }
 }
