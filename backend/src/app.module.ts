@@ -11,6 +11,8 @@ import { FeedbackModule } from "./feedback/feedback.module";
 import { SeasonModule } from "./season/season.module";
 import { RankingModule } from "./ranking/ranking.module";
 import { UserActivityModule } from "./user-activity/user-activity.module";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 @Module({
     imports: [
