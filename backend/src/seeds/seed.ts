@@ -111,4 +111,7 @@ async function bootstrap() {
     console.log("Seed completed!");
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+    console.error("Error during seeding:", err);
+    process.exit(1);
+});
