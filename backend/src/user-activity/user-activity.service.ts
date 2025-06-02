@@ -30,4 +30,12 @@ export class UserActivityService {
         });
         return this.userActivityRepo.save(userActivity);
     }
+
+    async findByUserId(userId: string) {
+        return this.userActivityRepo.find({
+            where: { user: { id: userId } },
+            relations: ["activity"],
+            order: { completedAt: "DESC" },
+        });
+    }
 }
