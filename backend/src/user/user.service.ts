@@ -5,6 +5,9 @@ import { Role } from "src/role/entity/role.entity";
 import { Repository } from "typeorm";
 import { CreateUserDto } from "./dto/create-user.dto";
 import * as bcrypt from "bcrypt";
+import { UserMeType } from "./type/user-me.type";
+import { Season } from "src/season/entity/season.entity";
+import { Ranking } from "src/ranking/entity/ranking.entity";
 
 @Injectable()
 export class UserService {
@@ -47,11 +50,47 @@ export class UserService {
         return this.userRepository.findOne({ where: { email }, relations: ["role"] });
     }
 
-    async findOne(id: string): Promise<User | null> {
-        return this.userRepository.findOne({
+    async findOneMe(id: string): Promise<UserMeType | null> {
+        const user = await this.userRepository.findOne({
             where: { id },
             relations: ["role"],
         });
+        if (!user) return null;
+
+        // Busca la temporada actual
+        const seasonRepo = this.userRepository.manager.getRepository(Season);
+        const now = new Date();
+        const currentSeason = await seasonRepo
+            .createQueryBuilder("season")
+            .where("season.start_date <= :now", { now })
+            .andWhere("season.end_date >= :now", { now })
+            .orderBy("season.start_date", "DESC")
+            .getOne();
+
+        let total_points = 0;
+        if (currentSeason) {
+            const rankingRepo = this.userRepository.manager.getRepository(Ranking);
+            const ranking = await rankingRepo.findOne({
+                where: { user: { id }, season: { id: currentSeason.id } },
+            });
+            total_points = ranking?.total_points ?? 0;
+        }
+
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            total_points,
+        };
+    }
+
+    async findOne(id: string): Promise<User | null> {
+        const user = await this.userRepository.findOne({ where: { id }, relations: ["role"] });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${id} not found`);
+        }
+        return user;
     }
 
     async update(id: string, updateData: Partial<User>): Promise<User | null> {

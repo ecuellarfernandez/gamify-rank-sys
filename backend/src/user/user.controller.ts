@@ -6,6 +6,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { RolesGuard } from "../auth/guard/roles.guard";
 import { Roles } from "../auth/decorator/roles.decorator";
 import { AuthenticatedRequest } from "./type/authenticated-request.type";
+import { UserMeType } from "./type/user-me.type";
 
 @Controller("user")
 export class UserController {
@@ -13,8 +14,12 @@ export class UserController {
 
     @UseGuards(AuthGuard("jwt"))
     @Get("me")
-    async me(@Req() req: AuthenticatedRequest) {
-        return await this.userService.findOne(String(req.user.id));
+    async me(@Req() req: AuthenticatedRequest): Promise<UserMeType> {
+        const user = await this.userService.findOneMe(String(req.user.id));
+        if (!user) {
+            throw new Error("User not found");
+        }
+        return user;
     }
 
     @UseGuards(AuthGuard("jwt"), RolesGuard)

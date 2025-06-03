@@ -15,6 +15,9 @@ export class Activity {
     @Column()
     points: number;
 
+    @Column({ default: false })
+    completed: boolean;
+
     @ManyToOne(() => User)
     @JoinColumn()
     user: User;

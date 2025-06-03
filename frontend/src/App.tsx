@@ -3,6 +3,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ProtectedRoute } from "./core/routing/ProtectedRoute";
 import RankingPage from "./ranking/pages/RankingPage";
 import LoginPage from "./login/pages/LoginPage";
+import ActivityPage from "./activity/pages/ActivityPage";
 
 function App() {
     return (
@@ -18,6 +19,14 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/actividades"
+                        element={
+                            <ProtectedRoute>
+                                <ActivityPage />
+                            </ProtectedRoute>
+                        }
+                        />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

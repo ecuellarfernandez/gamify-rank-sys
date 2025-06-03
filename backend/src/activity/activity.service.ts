@@ -17,6 +17,6 @@ export class ActivityService {
     }
 
     async findAll() {
-        return this.activityRepo.find();
+        return this.activityRepo.find({ order: { completed: "ASC" } });
     }
 }
