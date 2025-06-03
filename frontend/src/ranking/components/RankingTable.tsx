@@ -18,7 +18,7 @@ export function RankingTable({ ranking }: { ranking: RankingEntry[] }) {
     const podiumRanking = [ranking[1], ranking[0], ranking[2]];
 
     // Últimos 5 del ranking (excluyendo los 3 primeros)
-    const lastFive = ranking.slice(-5);
+    const lastFive = ranking.slice(-3);
 
     const handleCreateSeason = async () => {
         const now = new Date();
