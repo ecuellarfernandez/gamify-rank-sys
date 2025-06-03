@@ -76,6 +76,7 @@ export class UserService {
             const rankingRepo = this.userRepository.manager.getRepository(Ranking);
             const ranking = await rankingRepo.findOne({
                 where: { user: { id }, season: { id: lastSeason.id } },
+                relations: ["user", "season"],
             });
             console.log("[findOneMe] Ranking encontrado para usuario y temporada:", ranking);
             total_points = ranking?.total_points ?? 0;

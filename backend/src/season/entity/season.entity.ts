@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Ranking } from "src/ranking/entity/ranking.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Season {
@@ -13,4 +14,8 @@ export class Season {
 
     @Column({ type: "date" })
     end_date: Date;
+
+    // En Season
+    @OneToMany(() => Ranking, (ranking) => ranking.season)
+    rankings: Ranking[];
 }

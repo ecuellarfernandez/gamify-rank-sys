@@ -24,60 +24,76 @@ export class UserActivityService {
     ) {}
 
     async getCurrentSeason(): Promise<Season> {
-        const season = await this.seasonRepo.findOne({
+        const seasons = await this.seasonRepo.find({
             order: { start_date: "DESC" },
+            take: 1,
         });
+        const season = seasons[0];
         console.log("Temporada activa (última creada):", season);
         if (!season) throw new NotFoundException("No seasons found");
         return season;
     }
 
     async registerUserActivity(userId: string, dto: RegisterUserActivityDto): Promise<UserActivity> {
-        const user = await this.userRepo.findOne({ where: { id: userId } });
-        if (!user) throw new NotFoundException("User not found");
+        try {
+            const user = await this.userRepo.findOne({ where: { id: userId } });
+            if (!user) throw new NotFoundException("User not found");
 
-        const activity = await this.activityRepo.findOne({ where: { id: dto.activityId } });
-        if (!activity) throw new NotFoundException("Activity not found");
+            const activity = await this.activityRepo.findOne({ where: { id: dto.activityId } });
+            if (!activity) throw new NotFoundException("Activity not found");
 
-        // Si ya está completada, no permitir completarla de nuevo
-        if (activity.completed) {
-            throw new NotFoundException("Activity already completed by another user");
-        }
+            const currentSeason = await this.getCurrentSeason();
 
-        // Marcar como completada globalmente
-        activity.completed = true;
-        await this.activityRepo.save(activity);
-
-        // Registrar la actividad como completada por el usuario
-        const userActivity = this.userActivityRepo.create({
-            user,
-            activity,
-            completedAt: new Date(),
-        });
-        await this.userActivityRepo.save(userActivity);
-
-        // Sumar puntos al ranking de la temporada actual
-        const currentSeason = await this.getCurrentSeason();
-        let ranking = await this.rankingRepo.findOne({
-            where: { user: { id: user.id }, season: { id: currentSeason.id } },
-        });
-        if (!ranking) {
-            ranking = this.rankingRepo.create({
-                user,
-                season: currentSeason,
-                total_points: 0,
+            // Verifica si el usuario ya completó esta actividad en esta temporada
+            const alreadyDone = await this.userActivityRepo.findOne({
+                where: {
+                    user: { id: user.id },
+                    activity: { id: activity.id },
+                    season: { id: currentSeason.id },
+                },
             });
-        }
-        ranking.total_points += activity.points;
-        await this.rankingRepo.save(ranking);
+            if (alreadyDone) {
+                throw new NotFoundException("You already completed this activity in this season");
+            }
 
-        return userActivity;
+            // Registrar la actividad como completada por el usuario y la temporada
+            const userActivity = this.userActivityRepo.create({
+                user,
+                activity,
+                season: currentSeason,
+                completedAt: new Date(),
+            });
+            await this.userActivityRepo.save(userActivity);
+
+            // Sumar puntos al ranking de la temporada actual
+            let ranking = await this.rankingRepo.findOne({
+                where: { user: { id: user.id }, season: { id: currentSeason.id } },
+                relations: ["user", "season"],
+            });
+            if (!ranking) {
+                ranking = this.rankingRepo.create({
+                    user,
+                    season: currentSeason,
+                    total_points: 0,
+                });
+                console.log("[registerUserActivity] Ranking creado:", ranking);
+            } else {
+                console.log("[registerUserActivity] Ranking encontrado:", ranking);
+            }
+            ranking.total_points += activity.points;
+            await this.rankingRepo.save(ranking);
+
+            return userActivity;
+        } catch (error) {
+            console.error("[registerUserActivity] Error al registrar actividad:", error);
+            throw new NotFoundException("Error registering user activity");
+        }
     }
 
     async findByUserId(userId: string) {
         return this.userActivityRepo.find({
             where: { user: { id: userId } },
-            relations: ["activity"],
+            relations: ["activity", "season"],
             order: { completedAt: "DESC" },
         });
     }

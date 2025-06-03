@@ -7,11 +7,11 @@ export class Ranking {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @ManyToOne(() => User)
+    @ManyToOne(() => User, (user) => user.rankings)
     @JoinColumn()
     user: User;
 
-    @ManyToOne(() => Season)
+    @ManyToOne(() => Season, (season) => season.rankings)
     @JoinColumn()
     season: Season;
 

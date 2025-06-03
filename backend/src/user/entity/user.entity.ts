@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Role } from "src/role/entity/role.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { IsString, MinLength } from "class-validator";
+import { Ranking } from "src/ranking/entity/ranking.entity";
 
 @Entity()
 export class User {
@@ -22,4 +23,7 @@ export class User {
     @ManyToOne(() => Role, (role) => role.users)
     @JoinColumn({ name: "role_id" })
     role: Role;
+
+    @OneToMany(() => Ranking, (ranking) => ranking.user)
+    rankings: Ranking[];
 }
