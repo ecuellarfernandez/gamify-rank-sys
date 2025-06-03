@@ -51,40 +51,48 @@ export class UserService {
     }
 
     async findOneMe(id: string): Promise<UserMeType | null> {
+        console.log("[findOneMe] Buscando usuario con id:", id);
         const user = await this.userRepository.findOne({
             where: { id },
             relations: ["role"],
         });
-        if (!user) return null;
-
-        // Busca la temporada actual
-        const seasonRepo = this.userRepository.manager.getRepository(Season);
-        const now = new Date();
-        const currentSeason = await seasonRepo
-            .createQueryBuilder("season")
-            .where("season.start_date <= :now", { now })
-            .andWhere("season.end_date >= :now", { now })
-            .orderBy("season.start_date", "DESC")
-            .getOne();
-
-        let total_points = 0;
-        if (currentSeason) {
-            const rankingRepo = this.userRepository.manager.getRepository(Ranking);
-            const ranking = await rankingRepo.findOne({
-                where: { user: { id }, season: { id: currentSeason.id } },
-            });
-            total_points = ranking?.total_points ?? 0;
+        if (!user) {
+            console.error("[findOneMe] Usuario no encontrado:", id);
+            return null;
         }
 
-        return {
+        // Busca la última temporada creada (por start_date más reciente)
+        const seasonRepo = this.userRepository.manager.getRepository(Season);
+        const lastSeason = (
+            await seasonRepo.find({
+                order: { start_date: "DESC" },
+                take: 1,
+            })
+        )[0];
+        console.log("[findOneMe] Última temporada encontrada:", lastSeason);
+
+        let total_points = 0;
+        if (lastSeason) {
+            const rankingRepo = this.userRepository.manager.getRepository(Ranking);
+            const ranking = await rankingRepo.findOne({
+                where: { user: { id }, season: { id: lastSeason.id } },
+            });
+            console.log("[findOneMe] Ranking encontrado para usuario y temporada:", ranking);
+            total_points = ranking?.total_points ?? 0;
+        } else {
+            console.warn("[findOneMe] No hay temporadas registradas en la base de datos.");
+        }
+
+        const result = {
             id: user.id,
             name: user.name,
             email: user.email,
             role: user.role,
             total_points,
         };
+        console.log("[findOneMe] Resultado final:", result);
+        return result;
     }
-
     async findOne(id: string): Promise<User | null> {
         const user = await this.userRepository.findOne({ where: { id }, relations: ["role"] });
         if (!user) {

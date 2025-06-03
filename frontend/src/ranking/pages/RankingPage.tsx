@@ -10,9 +10,14 @@ export default function RankingPage() {
     const { seasons, loading: loadingSeasons } = useSeasons(token!);
     const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
 
+    // Selecciona la última temporada (más reciente) por defecto
     useEffect(() => {
         if (!loadingSeasons && seasons.length > 0 && !selectedSeason) {
-            setSelectedSeason(seasons[0].id);
+            // Ordena por start_date descendente y toma la primera
+            const sortedSeasons = [...seasons].sort(
+                (a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime()
+            );
+            setSelectedSeason(sortedSeasons[0].id);
         }
     }, [loadingSeasons, seasons, selectedSeason]);
 
@@ -25,19 +30,24 @@ export default function RankingPage() {
                 {loadingSeasons ? (
                     <p>Cargando temporadas...</p>
                 ) : (
-                    <select onChange={e => setSelectedSeason(e.target.value)} value={selectedSeason ?? ""}>
+                    <select
+                        onChange={e => setSelectedSeason(e.target.value)}
+                        value={selectedSeason ?? ""}
+                        disabled={loadingSeasons}
+                    >
                         <option value="" disabled>Selecciona una temporada</option>
-                        {seasons.map(season => (
-                            <option key={season.id} value={season.id}>
-                                {season.name} ({season.start_date} - {season.end_date})
-                            </option>
-                        ))}
+                        {[...seasons]
+                            .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
+                            .map(season => (
+                                <option key={season.id} value={season.id}>
+                                    {season.name} ({season.start_date} - {season.end_date})
+                                </option>
+                            ))}
                     </select>
                 )}
 
-                {selectedSeason && (
-                    loadingRanking ? <p>Cargando ranking...</p> : <RankingTable ranking={ranking} />
-                )}
+                {selectedSeason && !loadingRanking && <RankingTable ranking={ranking} />}
+                {selectedSeason && loadingRanking && <p>Cargando ranking...</p>}
             </div>
         </Layout>
     );

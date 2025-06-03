@@ -13,6 +13,7 @@ export function useRanking(seasonId: string, token: string) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if(!seasonId) return;
         setLoading(true);
         apiFetch<RankingEntry[]>(`/ranking/season/${seasonId}`, {}, token)
             .then(setRanking)

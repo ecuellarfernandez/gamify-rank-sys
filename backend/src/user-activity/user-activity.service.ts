@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, Raw } from "typeorm";
+import { Repository } from "typeorm";
 import { UserActivity } from "./entity/user-activity.entity";
 import { User } from "src/user/entity/user.entity";
 import { Activity } from "src/activity/entity/activity.entity";
@@ -24,15 +24,11 @@ export class UserActivityService {
     ) {}
 
     async getCurrentSeason(): Promise<Season> {
-        const now = new Date();
         const season = await this.seasonRepo.findOne({
-            where: {
-                start_date: Raw((alias) => `${alias} <= :now`, { now }),
-                end_date: Raw((alias) => `${alias} >= :now`, { now }),
-            },
             order: { start_date: "DESC" },
         });
-        if (!season) throw new NotFoundException("No active season found");
+        console.log("Temporada activa (última creada):", season);
+        if (!season) throw new NotFoundException("No seasons found");
         return season;
     }
 
@@ -52,9 +48,16 @@ export class UserActivityService {
         activity.completed = true;
         await this.activityRepo.save(activity);
 
-        // --- SUMAR PUNTOS AL RANKING DEL USUARIO ---
-        // Busca el ranking de la temporada actual (ajusta según tu lógica de temporada)
-        const currentSeason = await this.getCurrentSeason(); // Implementa este método según tu modelo
+        // Registrar la actividad como completada por el usuario
+        const userActivity = this.userActivityRepo.create({
+            user,
+            activity,
+            completedAt: new Date(),
+        });
+        await this.userActivityRepo.save(userActivity);
+
+        // Sumar puntos al ranking de la temporada actual
+        const currentSeason = await this.getCurrentSeason();
         let ranking = await this.rankingRepo.findOne({
             where: { user: { id: user.id }, season: { id: currentSeason.id } },
         });
@@ -68,13 +71,7 @@ export class UserActivityService {
         ranking.total_points += activity.points;
         await this.rankingRepo.save(ranking);
 
-        // -------------------------------------------
-
-        const userActivity = this.userActivityRepo.create({
-            user,
-            activity,
-        });
-        return this.userActivityRepo.save(userActivity);
+        return userActivity;
     }
 
     async findByUserId(userId: string) {
