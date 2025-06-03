@@ -18,4 +18,7 @@ export class Season {
     // En Season
     @OneToMany(() => Ranking, (ranking) => ranking.season)
     rankings: Ranking[];
+
+    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+    createdAt: Date;
 }

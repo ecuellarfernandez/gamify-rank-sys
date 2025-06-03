@@ -61,25 +61,32 @@ export class UserService {
             return null;
         }
 
-        // Busca la última temporada creada (por start_date más reciente)
+        // Busca la temporada más reciente (actual)
         const seasonRepo = this.userRepository.manager.getRepository(Season);
-        const lastSeason = (
-            await seasonRepo.find({
-                order: { start_date: "DESC" },
-                take: 1,
-            })
-        )[0];
-        console.log("[findOneMe] Última temporada encontrada:", lastSeason);
+        const [lastSeason] = await seasonRepo.find({
+            order: { start_date: "DESC", createdAt: "DESC" },
+            take: 1,
+        });
 
         let total_points = 0;
         if (lastSeason) {
             const rankingRepo = this.userRepository.manager.getRepository(Ranking);
-            const ranking = await rankingRepo.findOne({
+            let ranking = await rankingRepo.findOne({
                 where: { user: { id }, season: { id: lastSeason.id } },
                 relations: ["user", "season"],
             });
-            console.log("[findOneMe] Ranking encontrado para usuario y temporada:", ranking);
-            total_points = ranking?.total_points ?? 0;
+
+            // Si no existe el ranking, créalo con 0 puntos
+            if (!ranking) {
+                ranking = rankingRepo.create({
+                    user,
+                    season: lastSeason,
+                    total_points: 0,
+                });
+                await rankingRepo.save(ranking);
+            }
+
+            total_points = ranking.total_points;
         } else {
             console.warn("[findOneMe] No hay temporadas registradas en la base de datos.");
         }
@@ -94,6 +101,7 @@ export class UserService {
         console.log("[findOneMe] Resultado final:", result);
         return result;
     }
+
     async findOne(id: string): Promise<User | null> {
         const user = await this.userRepository.findOne({ where: { id }, relations: ["role"] });
         if (!user) {

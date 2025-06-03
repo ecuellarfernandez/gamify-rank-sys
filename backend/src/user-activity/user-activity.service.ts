@@ -25,7 +25,7 @@ export class UserActivityService {
 
     async getCurrentSeason(): Promise<Season> {
         const seasons = await this.seasonRepo.find({
-            order: { start_date: "DESC" },
+            order: { start_date: "DESC", createdAt: "DESC" },
             take: 1,
         });
         const season = seasons[0];
@@ -55,6 +55,10 @@ export class UserActivityService {
             if (alreadyDone) {
                 throw new NotFoundException("You already completed this activity in this season");
             }
+
+            // Marcar la actividad como completada globalmente
+            activity.completed = true;
+            await this.activityRepo.save(activity);
 
             // Registrar la actividad como completada por el usuario y la temporada
             const userActivity = this.userActivityRepo.create({
